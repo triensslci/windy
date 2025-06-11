@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
 
       theme: ThemeData.from(
         colorScheme: ColorScheme.light(),
+        useMaterial3: false,
 
         // primarySwatch: Colors.blue,
         textTheme: GoogleFonts.questrialTextTheme(
@@ -263,13 +264,14 @@ class MyHomePageState extends State<MyHomePage> {
               var data = jsonDecode(response.body);
               http.Response onecall = await http.get(Uri.parse(
                   'https://api.openweathermap.org/data/3.0/onecall?lat=${data['coord']['lat']}&lon=${data['coord']['lon']}&exclude=minutely,hourly&appid=$apiKey&units=metric'));
+              print(onecall.body);
               if (onecall.statusCode == 200) {
                 var onedata = jsonDecode(onecall.body);
                 //Map<String, dynamic> onedata = jsonDecode(response.body);
                 // List<dynamic> daily = onedata['daily'];
                 //Map<String, dynamic> tempp = daily[0]['temp'];
                 // lowTemp  = tempp['min'];
-                print(onedata);
+
                 setState(() {
                   lowTemp = onedata['daily'][0]['temp']['min'];
                   num temps = data['main']['temp'];
@@ -417,9 +419,10 @@ class MyHomePageState extends State<MyHomePage> {
 
   Widget getWeatherIcon(String description) {
     DateTime now = DateTime.now();
-    bool isDaytime =
-        now.isAfter(DateTime.fromMillisecondsSinceEpoch(sunrise!.toInt() * 1000)) &&
-            now.isBefore(DateTime.fromMillisecondsSinceEpoch(sunset!.toInt() * 1000));
+    bool isDaytime = now.isAfter(
+            DateTime.fromMillisecondsSinceEpoch(sunrise!.toInt() * 1000)) &&
+        now.isBefore(
+            DateTime.fromMillisecondsSinceEpoch(sunset!.toInt() * 1000));
 
     switch (description) {
       case 'Heavy Intensity Rain':
@@ -555,7 +558,7 @@ class MyHomePageState extends State<MyHomePage> {
       const NotificationDetails platformChannelSpecifics = NotificationDetails(
         android: androidPlatformChannelSpecifics,
       );
-      
+
       try {
         await flutterLocalNotificationsPlugin.periodicallyShow(
           0,
@@ -583,7 +586,8 @@ class MyHomePageState extends State<MyHomePage> {
           print(e2);
           // If notifications still fail, show a toast to inform the user
           Fluttertoast.showToast(
-            msg: "Unable to schedule notifications. Please enable exact alarm permission in settings.",
+            msg:
+                "Unable to schedule notifications. Please enable exact alarm permission in settings.",
             toastLength: Toast.LENGTH_LONG,
             gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.orange,
@@ -821,18 +825,18 @@ class MyHomePageState extends State<MyHomePage> {
                           .headlineMedium
                           ?.copyWith(fontSize: 58)),
                   SizedBox(height: 3),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.center,
-                  //   children: [
-                  //     Text(
-                  //         'H: ${isCelsius ? highTemp?.round() : (highTemp! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
-                  //         style: TextStyle(fontSize: 17)),
-                  //     SizedBox(width: 16),
-                  //     Text(
-                  //         'L: ${isCelsius ? lowTemp?.round() : (lowTemp! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
-                  //         style: TextStyle(fontSize: 17)),
-                  //   ],
-                  // ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                          'H: ${isCelsius ? highTemp?.round() : (highTemp! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
+                          style: TextStyle(fontSize: 17)),
+                      SizedBox(width: 16),
+                      Text(
+                          'L: ${isCelsius ? lowTemp?.round() : (lowTemp! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
+                          style: TextStyle(fontSize: 17)),
+                    ],
+                  ),
                   SizedBox(height: 5),
                   Center(
                       child: Text('$description',
@@ -853,7 +857,8 @@ class MyHomePageState extends State<MyHomePage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text('Độ ẩm',
-                                  style: Theme.of(context).textTheme.titleLarge),
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge),
                               SizedBox(height: 8),
                               Text('$humidity%',
                                   style: Theme.of(context)
@@ -875,7 +880,8 @@ class MyHomePageState extends State<MyHomePage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text('Áp suất',
-                                  style: Theme.of(context).textTheme.titleLarge),
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge),
                               SizedBox(height: 8),
                               Text(
                                   '${isMillibars ? pressure : (pressure! / 33.864).round()} ${isMillibars ? 'hPa' : 'inHg'}',
@@ -900,7 +906,8 @@ class MyHomePageState extends State<MyHomePage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text('Cảm giác như',
-                                  style: Theme.of(context).textTheme.titleLarge),
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge),
                               SizedBox(height: 8),
                               Text(
                                   '${isCelsius ? feels_like?.round() : (feels_like! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
@@ -977,7 +984,8 @@ class MyHomePageState extends State<MyHomePage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text('Mây che phủ',
-                                  style: Theme.of(context).textTheme.titleLarge),
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge),
                               SizedBox(height: 8),
                               Text('$cloudCoverage%',
                                   style: Theme.of(context)

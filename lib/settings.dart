@@ -16,7 +16,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: Text('Cài đặt'),
         foregroundColor: Theme.of(context).brightness == Brightness.light
             ? Colors.black
             : Colors.white,
@@ -28,7 +28,7 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         children: [
           ListTile(
-            title: Text('Enable Hourly Weather Alerts'),
+            title: Text('Bật thông báo thời tiết hàng giờ'),
             trailing: Switch(
               value: widget.homePageState.isHourlyNotificationEnabled,
               onChanged: (value) {
@@ -49,10 +49,10 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           ListTile(
-            title: Text('Temperature'),
+            title: Text('Nhiệt độ'),
             subtitle: DropdownButton<String>(
-              value: widget.homePageState.isCelsius ? 'Celsius' : 'Fahrenheit',
-              items: <String>['Celsius', 'Fahrenheit']
+              value: widget.homePageState.isCelsius ? 'Độ C' : 'Độ F',
+              items: <String>['Độ C', 'Độ F']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -61,7 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
               }).toList(),
               onChanged: (String? newValue) {
                 setState(() {
-                  widget.homePageState.isCelsius = newValue == 'Celsius';
+                  widget.homePageState.isCelsius = newValue == 'Độ C';
                   widget.onSettingsChanged();
                   widget.homePageState.savePreferences();
                 });
@@ -69,12 +69,12 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           ListTile(
-            title: Text('Wind Speed'),
+            title: Text('Tốc độ gió'),
             subtitle: DropdownButton<String>(
               value: widget.homePageState.isKilometersPerHour
-                  ? 'Kilometers per hour'
-                  : 'Miles per hour',
-              items: <String>['Kilometers per hour', 'Miles per hour']
+                  ? 'Kilômét/giờ'
+                  : 'Dặm/giờ',
+              items: <String>['Kilômét/giờ', 'Dặm/giờ']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -84,7 +84,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onChanged: (String? newValue) {
                 setState(() {
                   widget.homePageState.isKilometersPerHour =
-                      newValue == 'Kilometers per hour';
+                      newValue == 'Kilômét/giờ';
                   widget.onSettingsChanged();
                   widget.homePageState.savePreferences();
                 });
@@ -92,12 +92,12 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           ListTile(
-            title: Text('Pressure'),
+            title: Text('Áp suất'),
             subtitle: DropdownButton<String>(
               value: widget.homePageState.isMillibars
-                  ? 'Millibars'
-                  : 'Inches of mercury',
-              items: <String>['Millibars', 'Inches of mercury']
+                  ? 'Milibar'
+                  : 'Inch thủy ngân',
+              items: <String>['Milibar', 'Inch thủy ngân']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -106,7 +106,7 @@ class _SettingsPageState extends State<SettingsPage> {
               }).toList(),
               onChanged: (String? newValue) {
                 setState(() {
-                  widget.homePageState.isMillibars = newValue == 'Millibars';
+                  widget.homePageState.isMillibars = newValue == 'Milibar';
                   widget.onSettingsChanged();
                   widget.homePageState.savePreferences();
                 });
@@ -117,8 +117,8 @@ class _SettingsPageState extends State<SettingsPage> {
             alignment: Alignment.bottomCenter,
             padding: EdgeInsets.all(16),
             child: Text(
-              'Powered by OpenWeatherMap API',
-              style: Theme.of(context).textTheme.caption,
+              'Được hỗ trợ bởi OpenWeatherMap API',
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           )
         ],

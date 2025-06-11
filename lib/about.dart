@@ -17,7 +17,7 @@ class AboutPage extends StatelessWidget {
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(16))),
         elevation: 0,
         backgroundColor: Colors.transparent,
-        title: Text('About'),
+        title: Text('Giới thiệu'),
       ),
       body: Center(
         child: Column(
@@ -33,14 +33,14 @@ class AboutPage extends StatelessWidget {
             SizedBox(height: 16),
             // Display app name
             Text(
-              'Windy',
-              style: Theme.of(context).textTheme.headline5,
+              'Trung tâm Dự báo KTTV quốc gia',
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             SizedBox(height: 8),
             // Display app version
             Text(
-              'Version 1.0.3',
-              style: Theme.of(context).textTheme.caption,
+              'Phiên bản 1.0.3',
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             Spacer(),
             // Display developer name and GitHub repository

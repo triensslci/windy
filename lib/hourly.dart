@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:weather_icons/weather_icons.dart';
 
 class HourlyForecastPage extends StatefulWidget {
-  final double? lat;
-  final double? lon;
+  final num? lat;
+  final num? lon;
   final String apiKey;
 
   HourlyForecastPage({Key? key, this.lat, this.lon, required this.apiKey})
@@ -195,7 +195,7 @@ class _HourlyForecastPageState extends State<HourlyForecastPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Hourly Forecast"),
+        title: Text("Dự báo theo giờ"),
         foregroundColor: Theme.of(context).brightness == Brightness.light
             ? Colors.black
             : Colors.white,
@@ -220,7 +220,7 @@ class _HourlyForecastPageState extends State<HourlyForecastPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(formatDateTime(hourly['dt']),
-                      style: Theme.of(context).textTheme.headline6),
+                      style: Theme.of(context).textTheme.titleLarge),
                   SizedBox(height: 8),
                   Row(
                     children: [
@@ -232,7 +232,7 @@ class _HourlyForecastPageState extends State<HourlyForecastPage> {
                             Text(formatTemperature(hourly['temp']),
                                 style: Theme.of(context)
                                     .textTheme
-                                    .headline5
+                                    .headlineSmall
                                     ?.copyWith(fontWeight: FontWeight.bold)),
 // SizedBox(width:8),
                             Text(description),

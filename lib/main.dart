@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:weather_icons/weather_icons.dart';
 import 'package:flutter/services.dart';
-import 'package:connectivity/connectivity.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:permission_handler/permission_handler.dart'
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Windy',
+      title: 'Trung tâm Dự báo KTTV quốc gia',
       // themeMode: MyHomePage._key.currentState?._themeMode,
 
       theme: ThemeData.from(
@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
  labelStyle: TextStyle(color: Colors.white),
  ),*/
       ),
-      home: MyHomePage(title: 'Windy'),
+      home: MyHomePage(title: 'Trung tâm Dự báo KTTV quốc gia'),
     );
   }
 }
@@ -84,25 +84,26 @@ class MyHomePage extends StatefulWidget {
 
 class MyHomePageState extends State<MyHomePage> {
   String? city;
-  double? temperature;
-  double? highTemp; // new variable to store high temperature
-  double? lowTemp; // new variable to store low temperature
+  num? temperature;
+  num? highTemp; // new variable to store high temperature
+  num? lowTemp; // new variable to store low temperature
   String? description;
-  int? humidity;
-  int? pressure;
-  double? feels_like;
-  int? country;
-  int? sunrise;
-  int? sunset;
-  int? aqi;
+  num? humidity;
+  num? pressure;
+  num? feels_like;
+  num? country;
+  num? sunrise;
+  num? sunset;
+  num? aqi;
   String? name;
   double? lat;
   double? lon;
   double? latitude;
   double? longitude;
-  int? rsps;
+  num? rsps;
+  String? dynamicTitle; // Add this to track the dynamic title
 
-  int? cloudCoverage;
+  num? cloudCoverage;
   TextEditingController cityController = TextEditingController();
   String? errorMessage;
   bool searchBarVisible = false;
@@ -111,7 +112,7 @@ class MyHomePageState extends State<MyHomePage> {
   bool isMillibars = true;
   bool isHourlyNotificationEnabled = true;
   double? windSpeed;
-  int? windDirection;
+  num? windDirection;
   Duration animationDuration = Duration(milliseconds: 950);
   final ScrollController _scrollController = ScrollController();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -152,9 +153,9 @@ class MyHomePageState extends State<MyHomePage> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('Location Permission Required'),
+            title: Text('Cần quyền truy cập vị trí'),
             content: Text(
-                'Please grant location permission to use this feature or enter location manually.'),
+                'Vui lòng cấp quyền truy cập vị trí để sử dụng tính năng này hoặc nhập vị trí thủ công.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -226,8 +227,8 @@ class MyHomePageState extends State<MyHomePage> {
 
   void checkConnectivity() async {
     // Check for network connectivity
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.none) {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult.contains(ConnectivityResult.none)) {
       // No network connectivity, display a toast message
       Fluttertoast.showToast(
         msg: "Please check your internet connection and try again",
@@ -268,12 +269,13 @@ class MyHomePageState extends State<MyHomePage> {
                 // List<dynamic> daily = onedata['daily'];
                 //Map<String, dynamic> tempp = daily[0]['temp'];
                 // lowTemp  = tempp['min'];
+                print(onedata);
                 setState(() {
                   lowTemp = onedata['daily'][0]['temp']['min'];
-                  double temps = data['main']['temp'];
-                  double ht = onedata['daily'][0]['temp']['max'];
+                  num temps = data['main']['temp'];
+                  num ht = onedata['daily'][0]['temp']['max'];
                   if (temps > ht) {
-                    highTemp = temps;
+                    highTemp = temps.toDouble();
                   } else {
                     highTemp = onedata['daily'][0]['temp']['max'];
                   }
@@ -307,6 +309,7 @@ class MyHomePageState extends State<MyHomePage> {
           });
         }
       } catch (e) {
+        print(e);
         setState(() {
           errorMessage = 'Error: $e';
         });
@@ -383,6 +386,7 @@ class MyHomePageState extends State<MyHomePage> {
         });
       }
     } catch (e) {
+      print(e);
       setState(() {
         errorMessage = 'Error: $e';
       });
@@ -414,8 +418,8 @@ class MyHomePageState extends State<MyHomePage> {
   Widget getWeatherIcon(String description) {
     DateTime now = DateTime.now();
     bool isDaytime =
-        now.isAfter(DateTime.fromMillisecondsSinceEpoch(sunrise! * 1000)) &&
-            now.isBefore(DateTime.fromMillisecondsSinceEpoch(sunset! * 1000));
+        now.isAfter(DateTime.fromMillisecondsSinceEpoch(sunrise!.toInt() * 1000)) &&
+            now.isBefore(DateTime.fromMillisecondsSinceEpoch(sunset!.toInt() * 1000));
 
     switch (description) {
       case 'Heavy Intensity Rain':
@@ -478,17 +482,18 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    dynamicTitle = widget.title; // Initialize the dynamic title
     loadPreferences();
     _getLastSearchedCity();
     requestNotificationPermission();
     _scrollController.addListener(() {
       if (_scrollController.offset > 200) {
         setState(() {
-          widget.title = name ?? 'Windy';
+          dynamicTitle = name ?? 'Trung tâm Dự báo KTTV quốc gia';
         });
       } else {
         setState(() {
-          widget.title = 'Windy';
+          dynamicTitle = 'Trung tâm Dự báo KTTV quốc gia';
         });
       }
     });
@@ -518,7 +523,7 @@ class MyHomePageState extends State<MyHomePage> {
   void _initializeNotifications() async {
     /// await getWeather();
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('ic_stat');
+        AndroidInitializationSettings('ic_launcher');
 
     final InitializationSettings initializationSettings =
         InitializationSettings(
@@ -541,10 +546,6 @@ class MyHomePageState extends State<MyHomePage> {
 
   Future<void> showNotification() async {
     if (isHourlyNotificationEnabled) {
-      // double temperature = this.temperature!;
-      // String? city = name;
-      var time = Time(8, 0, 0); // 8:00:00 am
-
       const AndroidNotificationDetails androidPlatformChannelSpecifics =
           AndroidNotificationDetails('weather_channel_id', 'weather_channel',
               importance: Importance.high,
@@ -554,15 +555,43 @@ class MyHomePageState extends State<MyHomePage> {
       const NotificationDetails platformChannelSpecifics = NotificationDetails(
         android: androidPlatformChannelSpecifics,
       );
-      await flutterLocalNotificationsPlugin.periodicallyShow(
-        0,
-        '${isCelsius ? temperature?.round() : (temperature! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'} in $city',
-        '$description',
-        RepeatInterval.hourly,
-        platformChannelSpecifics,
-        payload: 'Weather Notification',
-        //icon: '@mipmap/your_icon_name',
-      );
+      
+      try {
+        await flutterLocalNotificationsPlugin.periodicallyShow(
+          0,
+          '${isCelsius ? temperature?.round() : (temperature! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'} in $city',
+          '$description',
+          RepeatInterval.hourly,
+          platformChannelSpecifics,
+          payload: 'Weather Notification',
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+      } catch (e) {
+        print(e);
+        // If exact alarms are not permitted, try with inexact timing
+        try {
+          await flutterLocalNotificationsPlugin.periodicallyShow(
+            0,
+            '${isCelsius ? temperature?.round() : (temperature! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'} in $city',
+            '$description',
+            RepeatInterval.hourly,
+            platformChannelSpecifics,
+            payload: 'Weather Notification',
+            androidScheduleMode: AndroidScheduleMode.inexact,
+          );
+        } catch (e2) {
+          print(e2);
+          // If notifications still fail, show a toast to inform the user
+          Fluttertoast.showToast(
+            msg: "Unable to schedule notifications. Please enable exact alarm permission in settings.",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.orange,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+      }
     } else {
       // Cancel the hourly notification if it's not enabled
       await flutterLocalNotificationsPlugin.cancel(0);
@@ -574,7 +603,7 @@ class MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       // extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(dynamicTitle ?? widget.title),
         // systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: Colors.transparent),
         foregroundColor: Theme.of(context).brightness == Brightness.light
             ? Colors.black
@@ -620,7 +649,7 @@ class MyHomePageState extends State<MyHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Windy',
+                    'Trung tâm Dự báo KTTV quốc gia',
                     style: TextStyle(
                       fontSize: 24,
                       color: Colors.white,
@@ -628,7 +657,7 @@ class MyHomePageState extends State<MyHomePage> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Weather App',
+                    'Ứng dụng Thời tiết',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,
@@ -638,7 +667,7 @@ class MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ListTile(
-              title: Text('Hourly Weather Forecast',
+              title: Text('Dự báo thời tiết theo giờ',
                   style: TextStyle(fontSize: 18)),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
@@ -657,7 +686,7 @@ class MyHomePageState extends State<MyHomePage> {
               },
             ),
             ListTile(
-              title: Text('7-Day Weather Forecast',
+              title: Text('Dự báo thời tiết 7 ngày',
                   style: TextStyle(fontSize: 18)),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
@@ -688,7 +717,7 @@ class MyHomePageState extends State<MyHomePage> {
   },
 ), */
             ListTile(
-              title: Text('Settings', style: TextStyle(fontSize: 18)),
+              title: Text('Cài đặt', style: TextStyle(fontSize: 18)),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
               leading: Icon(Icons.settings),
@@ -703,7 +732,7 @@ class MyHomePageState extends State<MyHomePage> {
               },
             ),
             ListTile(
-              title: Text('About', style: TextStyle(fontSize: 18)),
+              title: Text('Giới thiệu', style: TextStyle(fontSize: 18)),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
               leading: Icon(Icons.info),
@@ -736,7 +765,7 @@ class MyHomePageState extends State<MyHomePage> {
                         TextField(
                           controller: cityController,
                           decoration: InputDecoration(
-                              labelText: 'Enter City',
+                              labelText: 'Nhập tên thành phố',
                               filled: true,
                               border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(32))),
@@ -762,7 +791,7 @@ class MyHomePageState extends State<MyHomePage> {
                               name = null;
                             });
                           },
-                          child: Text('Search'),
+                          child: Text('Tìm kiếm'),
                           style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(32))),
@@ -780,7 +809,7 @@ class MyHomePageState extends State<MyHomePage> {
                   Text('$name',
                       style: Theme.of(context)
                           .textTheme
-                          .headline4
+                          .headlineMedium
                           ?.copyWith(fontSize: 52)),
                   SizedBox(height: 32),
                   getWeatherIcon(description ?? ''),
@@ -789,27 +818,27 @@ class MyHomePageState extends State<MyHomePage> {
                       '${isCelsius ? temperature?.round() : (temperature! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
                       style: Theme.of(context)
                           .textTheme
-                          .headline4
+                          .headlineMedium
                           ?.copyWith(fontSize: 58)),
                   SizedBox(height: 3),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                          'H: ${isCelsius ? highTemp?.round() : (highTemp! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
-                          style: TextStyle(fontSize: 17)),
-                      SizedBox(width: 16),
-                      Text(
-                          'L: ${isCelsius ? lowTemp?.round() : (lowTemp! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
-                          style: TextStyle(fontSize: 17)),
-                    ],
-                  ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     Text(
+                  //         'H: ${isCelsius ? highTemp?.round() : (highTemp! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
+                  //         style: TextStyle(fontSize: 17)),
+                  //     SizedBox(width: 16),
+                  //     Text(
+                  //         'L: ${isCelsius ? lowTemp?.round() : (lowTemp! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
+                  //         style: TextStyle(fontSize: 17)),
+                  //   ],
+                  // ),
                   SizedBox(height: 5),
                   Center(
                       child: Text('$description',
                           style: Theme.of(context)
                               .textTheme
-                              .headline6
+                              .titleLarge
                               ?.copyWith(fontSize: 44),
                           textAlign: TextAlign.center)),
                   SizedBox(height: 22),
@@ -823,13 +852,13 @@ class MyHomePageState extends State<MyHomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('Humidity',
-                                  style: Theme.of(context).textTheme.headline6),
+                              Text('Độ ẩm',
+                                  style: Theme.of(context).textTheme.titleLarge),
                               SizedBox(height: 8),
                               Text('$humidity%',
                                   style: Theme.of(context)
                                       .textTheme
-                                      .headline5
+                                      .headlineSmall
                                       ?.copyWith(fontWeight: FontWeight.bold)),
                             ],
                           ),
@@ -845,14 +874,14 @@ class MyHomePageState extends State<MyHomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('Pressure',
-                                  style: Theme.of(context).textTheme.headline6),
+                              Text('Áp suất',
+                                  style: Theme.of(context).textTheme.titleLarge),
                               SizedBox(height: 8),
                               Text(
                                   '${isMillibars ? pressure : (pressure! / 33.864).round()} ${isMillibars ? 'hPa' : 'inHg'}',
                                   style: Theme.of(context)
                                       .textTheme
-                                      .headline5
+                                      .headlineSmall
                                       ?.copyWith(fontWeight: FontWeight.bold)),
                             ],
                           ),
@@ -870,14 +899,14 @@ class MyHomePageState extends State<MyHomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('Feels like',
-                                  style: Theme.of(context).textTheme.headline6),
+                              Text('Cảm giác như',
+                                  style: Theme.of(context).textTheme.titleLarge),
                               SizedBox(height: 8),
                               Text(
                                   '${isCelsius ? feels_like?.round() : (feels_like! * 9 / 5 + 32).round()}°${isCelsius ? 'C' : 'F'}',
                                   style: Theme.of(context)
                                       .textTheme
-                                      .headline5
+                                      .headlineSmall
                                       ?.copyWith(fontWeight: FontWeight.bold)),
                             ],
                           ),
@@ -893,13 +922,13 @@ class MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text('AQI',
-                                style: Theme.of(context).textTheme.headline6),
+                            Text('Chỉ số AQI',
+                                style: Theme.of(context).textTheme.titleLarge),
                             SizedBox(height: 8),
                             Text('$aqi',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .headline5
+                                    .headlineSmall
                                     ?.copyWith(fontWeight: FontWeight.bold)),
                           ],
                         ),
@@ -919,19 +948,19 @@ class MyHomePageState extends State<MyHomePage> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
-                                    'Winds (${getCardinalDirection(windDirection)})',
+                                    'Gió (${getCardinalDirection(windDirection!.toInt())})',
                                     style:
-                                        Theme.of(context).textTheme.headline6),
+                                        Theme.of(context).textTheme.titleLarge),
                                 SizedBox(height: 8),
                                 Text(
                                     '${isKilometersPerHour ? (windSpeed! * 3.6).round() : (windSpeed! * 2.237).round()} ${isKilometersPerHour ? 'km/h' : 'mph'}',
                                     style: Theme.of(context)
                                         .textTheme
-                                        .headline5
+                                        .headlineSmall
                                         ?.copyWith(
                                             fontWeight: FontWeight.bold)),
                                 //SizedBox(height: 8),
-                                // Text('Direction: ${getCardinalDirection(windDirection)}', style:Theme.of(context).textTheme.headline6),
+                                // Text('Direction: ${getCardinalDirection(windDirection)}', style:Theme.of(context).textTheme.titleLarge),
                               ],
                             ),
                           ),
@@ -947,13 +976,13 @@ class MyHomePageState extends State<MyHomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('Cloudiness',
-                                  style: Theme.of(context).textTheme.headline6),
+                              Text('Mây che phủ',
+                                  style: Theme.of(context).textTheme.titleLarge),
                               SizedBox(height: 8),
                               Text('$cloudCoverage%',
                                   style: Theme.of(context)
                                       .textTheme
-                                      .headline5
+                                      .headlineSmall
                                       ?.copyWith(fontWeight: FontWeight.bold)),
                             ],
                           ),
@@ -975,17 +1004,17 @@ class MyHomePageState extends State<MyHomePage> {
                               children: [
                                 Icon(Icons.wb_sunny),
                                 SizedBox(height: 8),
-                                Text('Sunrise',
+                                Text('Mặt trời mọc',
                                     style:
-                                        Theme.of(context).textTheme.headline6),
+                                        Theme.of(context).textTheme.titleLarge),
                                 SizedBox(height: 8),
                                 Text(
                                     DateFormat('HH:mm').format(
                                         DateTime.fromMillisecondsSinceEpoch(
-                                            sunrise! * 1000)),
+                                            sunrise!.toInt() * 1000)),
                                     style: Theme.of(context)
                                         .textTheme
-                                        .headline5
+                                        .headlineSmall
                                         ?.copyWith(
                                             fontWeight: FontWeight.bold)),
                               ],
@@ -1005,17 +1034,17 @@ class MyHomePageState extends State<MyHomePage> {
                               children: [
                                 Icon(Icons.brightness_3),
                                 SizedBox(height: 8),
-                                Text('Sunset',
+                                Text('Mặt trời lặn',
                                     style:
-                                        Theme.of(context).textTheme.headline6),
+                                        Theme.of(context).textTheme.titleLarge),
                                 SizedBox(height: 8),
                                 Text(
                                     DateFormat('HH:mm').format(
                                         DateTime.fromMillisecondsSinceEpoch(
-                                            sunset! * 1000)),
+                                            sunset!.toInt() * 1000)),
                                     style: Theme.of(context)
                                         .textTheme
-                                        .headline5
+                                        .headlineSmall
                                         ?.copyWith(
                                             fontWeight: FontWeight.bold)),
                               ],
@@ -1034,17 +1063,17 @@ class MyHomePageState extends State<MyHomePage> {
                           children: [
                             Icon(Icons.search, size: 120),
                             SizedBox(height: 16),
-                            Text('Enter a valid city name to get started',
-                                style: Theme.of(context).textTheme.headline6,
+                            Text('Nhập tên thành phố hợp lệ để bắt đầu',
+                                style: Theme.of(context).textTheme.titleLarge,
                                 textAlign: TextAlign.center),
                             SizedBox(height: 16),
-                            Text('or',
-                                style: Theme.of(context).textTheme.headline6,
+                            Text('hoặc',
+                                style: Theme.of(context).textTheme.titleLarge,
                                 textAlign: TextAlign.center),
                             SizedBox(height: 16),
                             Text(
-                                'Use GPS to get weather of your current location',
-                                style: Theme.of(context).textTheme.headline6,
+                                'Sử dụng GPS để lấy thời tiết tại vị trí hiện tại',
+                                style: Theme.of(context).textTheme.titleLarge,
                                 textAlign: TextAlign.center),
                           ]),
                     )

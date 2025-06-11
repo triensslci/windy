@@ -7,8 +7,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:windy/key.dart';
 
 class ForecastPage extends StatefulWidget {
-  final double? lat;
-  final double? lon;
+  final num? lat;
+  final num? lon;
   final String? apiKey;
 
   const ForecastPage({
@@ -52,6 +52,7 @@ class _ForecastPageState extends State<ForecastPage> {
         // Handle error
       }
     } catch (e) {
+      print(e);
       // Handle error
     }
   }
@@ -104,7 +105,7 @@ Widget getWeatherIcon(String description) {
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
-      title: Text('7-day weather forecast'),
+      title: Text('Dự báo thời tiết 7 ngày'),
       foregroundColor: Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(16))),
       elevation: 0,
@@ -122,9 +123,9 @@ Widget build(BuildContext context) {
 
         String dayLabel;
         if (index == 0) {
-          dayLabel = 'Today';
+          dayLabel = 'Hôm nay';
         } else if (index == 1) {
-          dayLabel = 'Tomorrow';
+          dayLabel = 'Ngày mai';
         } else {
           dayLabel = DateFormat('EEEE').format(date);
         }
@@ -138,7 +139,7 @@ Widget build(BuildContext context) {
               children: [
                 Text(
                   dayLabel,
-                  style: Theme.of(context).textTheme.headline6,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
                 SizedBox(height: 8),
                 Row(
@@ -150,7 +151,7 @@ Widget build(BuildContext context) {
                           Text(
                             '$temperature°C',
                             style:
-                                Theme.of(context).textTheme.headline5?.copyWith(
+                                Theme.of(context).textTheme.headlineSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
                           ),
